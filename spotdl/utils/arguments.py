@@ -70,9 +70,14 @@ def parse_main_options(parser: _ArgumentGroup):
         nargs="+",
         type=str,
         help=(
-            "N|Spotify/YouTube URL for a song/playlist/album/artist/etc. to download.\n"
-            "For album searching, include 'album:' and optional 'artist:' tags\n"
-            "(ie. 'album:the album name' or 'artist:the artist album: the album').\n"
+            "N|Spotify/YouTube URL for a song/playlist/album/artist/etc. to download.\n\n"
+            "For album/playlist/artist searching, include 'album:', 'playlist:', 'artist:' \n"
+            "(ie. 'album:the album name' you can mix these options to get more accurate results)"
+            ".\n\n"
+            "To download liked songs use 'saved' as the query, to download all user playlists\n"
+            "use 'all-user-playlists, to download all songs from all followed artists "
+            "use 'all-user-followed-artists', to download all user saved albums "
+            "use 'all-user-saved-albums' \n\n"
             "For manual audio matching, you can use the format 'YouTubeURL|SpotifyURL'\n"
             "You can only use album/playlist/tracks urls when "
             "downloading/matching youtube urls.\n"
@@ -329,7 +334,7 @@ def parse_output_options(parser: _ArgumentGroup):
             "The file to save/load the songs data from/to. "
             "It has to end with .spotdl. "
             "If combined with the download operation, it will save the songs data to the file. "
-            "Required for save/preload/sync"
+            "Required for save/sync (use - to print to stdout when using save). "
         ),
         required=len(sys.argv) > 1 and sys.argv[1] in ["save"],
     )
@@ -385,12 +390,14 @@ def parse_output_options(parser: _ArgumentGroup):
         type=str,
     )
 
-    # Option to restrict filenames for easier handling in the shell
+    # Option to increase compatibility of filenames and easier handling in the shell
     parser.add_argument(
         "--restrict",
-        action="store_const",
-        const=True,
-        help="Restrict filenames to ASCII only",
+        choices={"strict", "ascii", "none"},
+        const="strict",
+        nargs="?",
+        help="Restrict filenames to a sanitized set of characters for better compatibility",
+        type=str,
     )
 
     # Option to print errors on exit, useful for long playlist
@@ -399,6 +406,13 @@ def parse_output_options(parser: _ArgumentGroup):
         action="store_const",
         const=True,
         help="Print errors (wrong songs, failed downloads etc) on exit, useful for long playlist",
+    )
+
+    # Option to save errors to a file
+    parser.add_argument(
+        "--save-errors",
+        type=str,
+        help="Save errors (wrong songs, failed downloads etc) to a file",
     )
 
     # Option to use sponsor block
@@ -509,6 +523,52 @@ def parse_output_options(parser: _ArgumentGroup):
         ),
     )
 
+    # YT-DlP options
+    parser.add_argument(
+        "--yt-dlp-args",
+        type=str,
+        help="Arguments to pass to yt-dlp",
+    )
+
+    # Detect formats option
+    parser.add_argument(
+        "--detect-formats",
+        type=str,
+        nargs="*",
+        help=(
+            "Detect already downloaded songs with file format different from the --format option "
+            "(When combined with --m3u option, "
+            "only first detected format will be added to m3u file)"
+        ),
+        choices=FFMPEG_FORMATS.keys(),
+    )
+
+    # download song in meta operation
+    parser.add_argument(
+        "--redownload",
+        action="store_const",
+        const=True,
+        help="to redownload the local song in diffrent format using --format for meta operation",
+    )
+
+    # Ignore songs from a paticular album
+    parser.add_argument(
+        "--ignore-albums",
+        type=str,
+        nargs="*",
+        help="ignores the song of the given albums",
+    )
+
+    # Skip explicit songs options
+    parser.add_argument(
+        "--skip-explicit", action="store_const", const=True, help="Skip explicit songs"
+    )
+
+    parser.add_argument(
+        "--proxy",
+        help="Http(s) proxy server for download song. Example: http://host:port",
+    )
+
 
 def parse_web_options(parser: _ArgumentGroup):
     """
@@ -588,6 +648,15 @@ def parse_misc_options(parser: _ArgumentGroup):
         action="store_const",
         const=True,
         help="Use a simple tui.",
+    )
+
+    # Add log format argument
+    parser.add_argument(
+        "--log-format",
+        help=(
+            "Custom logging format to use. More info: "
+            "https://docs.python.org/3/library/logging.html#logrecord-attributes"
+        ),
     )
 
 

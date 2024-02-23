@@ -5,6 +5,7 @@ Default config - spotdl.utils.config.DEFAULT_CONFIG
 """
 
 import json
+import logging
 import os
 import platform
 from argparse import Namespace
@@ -35,6 +36,8 @@ __all__ = [
     "WEB_OPTIONS",
     "DEFAULT_CONFIG",
 ]
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigError(Exception):
@@ -230,6 +233,45 @@ def create_settings(
     return spotify_options, downloader_options, web_options
 
 
+def modernize_settings(options: DownloaderOptions):
+    """Handle deprecated values in config file.
+
+    ### Arguments
+    - options: DownloaderOptions to modernize
+    """
+
+    warning_msg = "Deprecated '%s' value found for '%s' setting in config file. Using '%s' instead."
+
+    # Respect backward compatibility with old boolean --restrict flag
+    if options["restrict"] is True:
+        logger.warning(warning_msg, True, "restrict", "strict")
+        options["restrict"] = "strict"
+
+
+class GlobalConfig:
+    """
+    Class to store global configuration
+    """
+
+    parameters: Dict[str, Any] = {}
+
+    @classmethod
+    def set_parameter(cls, key, value):
+        """
+        Set a parameter for the download config
+        """
+
+        cls.parameters[key] = value
+
+    @classmethod
+    def get_parameter(cls, key):
+        """
+        Get a parameter from the download config
+        """
+
+        return cls.parameters.get(key, None)
+
+
 SPOTIFY_OPTIONS: SpotifyOptions = {
     "client_id": "5f573c9620494bae87890c0f08a60293",
     "client_secret": "212476d9b0f3472eaa762d90b19b0ba8",
@@ -259,7 +301,7 @@ DOWNLOADER_OPTIONS: DownloaderOptions = {
     "filter_results": True,
     "threads": 4,
     "cookie_file": None,
-    "restrict": False,
+    "restrict": None,
     "print_errors": False,
     "sponsor_block": False,
     "preload": False,
@@ -276,6 +318,14 @@ DOWNLOADER_OPTIONS: DownloaderOptions = {
     "only_verified_results": False,
     "sync_without_deleting": False,
     "max_filename_length": None,
+    "yt_dlp_args": None,
+    "detect_formats": None,
+    "save_errors": None,
+    "ignore_albums": None,
+    "proxy": None,
+    "skip_explicit": False,
+    "log_format": None,
+    "redownload": False,
 }
 
 WEB_OPTIONS: WebOptions = {

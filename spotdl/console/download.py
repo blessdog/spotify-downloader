@@ -22,7 +22,12 @@ def download(
     """
 
     # Parse the query
-    songs = get_simple_songs(query, use_ytm_data=downloader.settings["ytm_data"])
+    songs = get_simple_songs(
+        query,
+        use_ytm_data=downloader.settings["ytm_data"],
+        playlist_numbering=downloader.settings["playlist_numbering"],
+        albums_to_ignore=downloader.settings["ignore_albums"],
+    )
 
     # Download the songs
     downloader.download_multiple_songs(songs)

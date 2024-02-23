@@ -57,7 +57,7 @@ class DownloaderOptions(TypedDict):
     filter_results: bool
     threads: int
     cookie_file: Optional[str]
-    restrict: bool
+    restrict: Optional[str]
     print_errors: bool
     sponsor_block: bool
     preload: bool
@@ -74,6 +74,14 @@ class DownloaderOptions(TypedDict):
     only_verified_results: bool
     sync_without_deleting: bool
     max_filename_length: Optional[int]
+    yt_dlp_args: Optional[str]
+    detect_formats: Optional[List[str]]
+    save_errors: Optional[str]
+    ignore_albums: Optional[List[str]]
+    proxy: Optional[str]
+    skip_explicit: Optional[bool]
+    log_format: Optional[str]
+    redownload: Optional[bool]
 
 
 class WebOptions(TypedDict):
@@ -132,7 +140,7 @@ class DownloaderOptionalOptions(TypedDict, total=False):
     filter_results: bool
     threads: int
     cookie_file: Optional[str]
-    restrict: bool
+    restrict: Optional[str]
     print_errors: bool
     sponsor_block: bool
     preload: bool
@@ -149,6 +157,13 @@ class DownloaderOptionalOptions(TypedDict, total=False):
     only_verified_results: bool
     sync_without_deleting: bool
     max_filename_length: Optional[int]
+    yt_dlp_args: Optional[str]
+    detect_formats: Optional[List[str]]
+    save_errors: Optional[str]
+    proxy: Optional[str]
+    skip_explicit: Optional[bool]
+    log_format: Optional[str]
+    redownload: Optional[bool]
 
 
 class WebOptionalOptions(TypedDict, total=False):

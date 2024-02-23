@@ -4,6 +4,7 @@ Base audio provider module.
 
 import logging
 import re
+import shlex
 from typing import Any, Dict, List, Optional, Tuple
 
 from yt_dlp import YoutubeDL
@@ -11,7 +12,11 @@ from yt_dlp import YoutubeDL
 from spotdl.types.result import Result
 from spotdl.types.song import Song
 from spotdl.utils.config import get_temp_path
-from spotdl.utils.formatter import create_search_query, create_song_title
+from spotdl.utils.formatter import (
+    args_to_ytdlp_options,
+    create_search_query,
+    create_song_title,
+)
 from spotdl.utils.matching import get_best_matches, order_results
 
 __all__ = ["AudioProviderError", "AudioProvider", "ISRC_REGEX", "YTDLLogger"]
@@ -70,6 +75,7 @@ class AudioProvider:
         cookie_file: Optional[str] = None,
         search_query: Optional[str] = None,
         filter_results: bool = True,
+        yt_dlp_args: Optional[str] = None,
     ) -> None:
         """
         Base class for audio providers.
@@ -94,18 +100,22 @@ class AudioProvider:
         else:
             ytdl_format = "bestaudio"
 
-        self.audio_handler = YoutubeDL(
-            {
-                "format": ytdl_format,
-                "quiet": True,
-                "no_warnings": True,
-                "encoding": "UTF-8",
-                "logger": YTDLLogger(),
-                "cookiefile": self.cookie_file,
-                "outtmpl": f"{get_temp_path()}/%(id)s.%(ext)s",
-                "retries": 5,
-            }
-        )
+        yt_dlp_options = {
+            "format": ytdl_format,
+            "quiet": True,
+            "no_warnings": True,
+            "encoding": "UTF-8",
+            "logger": YTDLLogger(),
+            "cookiefile": self.cookie_file,
+            "outtmpl": f"{get_temp_path()}/%(id)s.%(ext)s",
+            "retries": 5,
+        }
+
+        if yt_dlp_args:
+            user_options = args_to_ytdlp_options(shlex.split(yt_dlp_args))
+            yt_dlp_options.update(user_options)
+
+        self.audio_handler = YoutubeDL(yt_dlp_options)
 
     def get_results(self, search_term: str, **kwargs) -> List[Result]:
         """
@@ -160,9 +170,7 @@ class AudioProvider:
 
         # search for song using isrc if it's available
         if song.isrc and self.SUPPORTS_ISRC and not self.search_query:
-            isrc_results = self.get_results(
-                song.isrc, filter="songs", ignore_spelling=True
-            )
+            isrc_results = self.get_results(song.isrc, **self.GET_RESULTS_OPTS[0])
 
             if only_verified:
                 isrc_results = [result for result in isrc_results if result.verified]
@@ -233,12 +241,16 @@ class AudioProvider:
 
                 return isrc_result.url
 
+            logger.debug(
+                "[%s] Have to filter results: %s", song.song_id, self.filter_results
+            )
+
             if self.filter_results:
                 # Order results
                 new_results = order_results(search_results, song, self.search_query)
             else:
                 new_results = {}
-                if len(new_results) > 0:
+                if len(search_results) > 0:
                     new_results = {search_results[0]: 100.0}
 
             logger.debug("[%s] Filtered to %s results", song.song_id, len(new_results))
@@ -315,16 +327,30 @@ class AudioProvider:
         # return the one with the highest score
         # and most views
         if len(best_results) > 1:
-            views = []
+            views: List[int] = []
             for best_result in best_results:
                 if best_result[0].views:
                     views.append(best_result[0].views)
                 else:
                     views.append(self.get_views(best_result[0].url))
 
-            best_result = best_results[views.index(max(views))]
+            highest_views = max(views)
+            lowest_views = min(views)
 
-            return best_result[0], best_result[1]
+            if highest_views in (0, lowest_views):
+                return best_result[0], best_result[1]
+
+            weighted_results: List[Tuple[Result, float]] = []
+            for index, best_result in enumerate(best_results):
+                result_views = views[index]
+                views_score = (
+                    (result_views - lowest_views) / (highest_views - lowest_views)
+                ) * 15
+                score = min(best_result[1] + views_score, 100)
+                weighted_results.append((best_result[0], score))
+
+            # Now we return the result with the highest score
+            return max(weighted_results, key=lambda x: x[1])
 
         return best_result[0], best_result[1]
 
@@ -345,6 +371,7 @@ class AudioProvider:
             if data:
                 return data
         except Exception as exception:
+            logger.debug(exception)
             raise AudioProviderError(f"YT-DLP download error - {url}") from exception
 
         raise AudioProviderError(f"No metadata found for the provided url {url}")

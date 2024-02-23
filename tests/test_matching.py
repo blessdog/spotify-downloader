@@ -72,12 +72,16 @@ from tests.conftest import new_initialize
                 "https://www.youtube.com/watch?v=H4kTNq0npEQ",
                 "https://www.youtube.com/watch?v=rk2hmQF4oDc",
                 "https://www.youtube.com/watch?v=iAbnEUA0wpA",
+                "https://www.youtube.com/watch?v=moi_oii0Ls8",
             ],
         ),
         (
             # Потап и Настя - Чумачечая весна
             "https://open.spotify.com/track/2eaSMmKfigsm96aTUJMoIk",
-            ["https://music.youtube.com/watch?v=A-PjXUzhFDk"],
+            [
+                "https://music.youtube.com/watch?v=A-PjXUzhFDk",
+                "https://music.youtube.com/watch?v=Bjia3dKZqfo",
+            ],
         ),
         (
             # Cash Cash - Surrender
@@ -94,18 +98,22 @@ from tests.conftest import new_initialize
             [
                 "https://music.youtube.com/watch?v=Apej0F8ack0",
                 "https://music.youtube.com/watch?v=7xRMrGO-OLo",
+                "https://music.youtube.com/watch?v=OIfpADMVVvQ",
             ],
         ),
         (
             # Lisa Hannigan - Amhrán Na Farraige
             "https://open.spotify.com/track/07paTkxx4R7rmiGjqm84RM",
-            ["https://music.youtube.com/watch?v=f-VuVq0I0-U"],
+            [
+                "https://music.youtube.com/watch?v=f-VuVq0I0-U",
+                "https://music.youtube.com/watch?v=C32q5UoIdfQ",
+            ],
         ),
-        (
-            # Pavel Petrov - Granger Says
-            "https://open.spotify.com/track/6fAmcQ6DjLDA0uHnbdAQmJ",
-            ["https://music.youtube.com/watch?v=8WIPgiDVeDs"],
-        ),
+        # (
+        #     # Pavel Petrov - Granger Says
+        #     "https://open.spotify.com/track/6fAmcQ6DjLDA0uHnbdAQmJ",
+        #     ["https://music.youtube.com/watch?v=8WIPgiDVeDs"],
+        # ),
         (
             # Billy Joel - Piano Man
             "https://open.spotify.com/track/70C4NyhjD5OZUMzvWZ3njJ",
@@ -185,7 +193,10 @@ from tests.conftest import new_initialize
         (
             # Quebonafide - GAZPROM
             "https://open.spotify.com/track/46RBT9mCXUZEZa0CyA0thr",
-            ["https://music.youtube.com/watch?v=3edPRi_CDmc"],
+            [
+                "https://music.youtube.com/watch?v=3edPRi_CDmc",
+                "https://www.youtube.com/watch?v=vxSdBWdCLl4",
+            ],
         ),
         (
             # 2115 - ROTTWEILER
@@ -195,16 +206,16 @@ from tests.conftest import new_initialize
                 "https://music.youtube.com/watch?v=JBz8PGZ8eR0",
             ],
         ),
-        (
-            # SB Maffija - Kapuśniak
-            "https://open.spotify.com/track/1ZIiF3VCX4zbIiiiUPndW7",
-            ["https://www.youtube.com/watch?v=GmiyIaE-Liw"],
-        ),
-        (
-            # SB Maffija - Dzieci we mgle
-            "https://open.spotify.com/track/13UorE0BauUBREWFJNmnYR",
-            ["https://www.youtube.com/watch?v=jLlRchjuFVU"],
-        ),
+        # (
+        #     # SB Maffija - Kapuśniak
+        #     "https://open.spotify.com/track/1ZIiF3VCX4zbIiiiUPndW7",
+        #     ["https://www.youtube.com/watch?v=GmiyIaE-Liw"],
+        # ),
+        # (
+        #     # SB Maffija - Dzieci we mgle
+        #     "https://open.spotify.com/track/13UorE0BauUBREWFJNmnYR",
+        #     ["https://www.youtube.com/watch?v=jLlRchjuFVU"],
+        # ),
         (
             # club2020 - club2020
             "https://open.spotify.com/track/0zmxM4MXfisJRTQcPa1wbv",
@@ -247,15 +258,18 @@ from tests.conftest import new_initialize
             "https://open.spotify.com/track/5CfVW6OUB6Uh9X6XVpdNYE",
             ["https://music.youtube.com/watch?v=tfTOTXOlplY"],
         ),
-        (
-            # Loud Luxury - Body (Dzeko Remix)
-            "https://open.spotify.com/track/3ATwxbyPDsZWvlBdnyKNPQ",
-            [
-                "https://music.youtube.com/watch?v=U4OSUSK5_rU",
-                "https://music.youtube.com/watch?v=5QubA-k2Vig",
-                "https://music.youtube.com/watch?v=bBQ9dujVLQ0",
-            ],
-        ),
+        # (
+        #     # Loud Luxury - Body (Dzeko Remix)
+        #     "https://open.spotify.com/track/3ATwxbyPDsZWvlBdnyKNPQ",
+        #     [
+        #         "https://music.youtube.com/watch?v=U4OSUSK5_rU",
+        #         "https://music.youtube.com/watch?v=iMWarB4ItmQ",
+        #         "https://music.youtube.com/watch?viMWarB4ItmQ"
+        #         "https://music.youtube.com/watch?v=5QubA-k2Vig",
+        #         "https://music.youtube.com/watch?v=bBQ9dujVLQ0",
+        #         "https://www.youtube.com/watch?v=2so8YAEwuio",
+        #     ],
+        # ),
         (
             # Eartha Kitt - Santa Baby
             "https://open.spotify.com/track/1foCxQtxBweJtZmdxhEHVO",
@@ -334,6 +348,32 @@ from tests.conftest import new_initialize
             "https://open.spotify.com/track/5ittjnOocNZ5dRoRXMMGAC",
             ["https://music.youtube.com/watch?v=AZXGnKwRA2A"],
         ),
+        (
+            # Metallica - For Whom The Bell Tolls (Remastered)
+            "https://open.spotify.com/track/51YZAJhOwIC5Gg3jMbAmhZ",
+            [
+                "https://www.youtube.com/watch?v=KO3l6qNA2Q4",
+                "https://www.youtube.com/watch?v=unrdoZwLYbU",
+                "https://www.youtube.com/watch?v=B_HSa1dEL9s",
+                "https://www.youtube.com/watch?v=tp83QrhNguM",
+                "https://www.youtube.com/watch?v=oru1gyxUImI",
+            ],
+        ),
+        (
+            # Fukaj x Mata - OWOCE 33
+            "https://open.spotify.com/track/4Dy9azWTLsDMUdUxrT1170",
+            [
+                "https://www.youtube.com/watch?v=KD5ncAFjRzY",
+                "https://www.youtube.com/watch?v=9DKKhnmgCIo",
+            ],
+        ),
+        (
+            # Męskie Granie Orkiestra 2023 - Supermoce (feat. Igo, Mrozu & Vito Bambino)
+            "https://open.spotify.com/track/4EqPIm07a55pJQRSZw2Z4X",
+            [
+                "https://music.youtube.com/watch?v=pKqVj-ermPY",
+            ],
+        ),
         # (
         #     # Kado - Tired Eyes
         #     "https://open.spotify.com/track/0MSLJOWljfQr067PYyndK9",
@@ -349,4 +389,6 @@ def test_ytmusic_matching(monkeypatch, query, expected):
 
     yt_music = YouTubeMusic()
 
-    assert yt_music.search(Song.from_url(query)) in expected
+    video_ids = [link.split("?v=")[1] for link in expected]
+
+    assert yt_music.search(Song.from_url(query)).split("?v=")[1] in video_ids

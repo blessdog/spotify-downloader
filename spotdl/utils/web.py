@@ -31,11 +31,14 @@ from uvicorn import Server
 from spotdl._version import __version__
 from spotdl.download.downloader import Downloader
 from spotdl.download.progress_handler import ProgressHandler, SongTracker
+from spotdl.types.album import Album
+from spotdl.types.artist import Artist
 from spotdl.types.options import (
     DownloaderOptionalOptions,
     DownloaderOptions,
     WebOptions,
 )
+from spotdl.types.playlist import Playlist
 from spotdl.types.song import Song
 from spotdl.utils.arguments import create_parser
 from spotdl.utils.config import (
@@ -139,7 +142,7 @@ class Client:
         await self.websocket.accept()
 
         # Add the connection to the list of connections
-        app_state.clients.append(self)
+        app_state.clients[self.client_id] = self
         app_state.logger.info("Client %s connected", self.client_id)
 
     async def send_update(self, update: Dict[str, Any]):
@@ -183,9 +186,9 @@ class Client:
         - returns the WebSocket instance.
         """
 
-        for instance in app_state.clients:
-            if instance.client_id == client_id:
-                return instance
+        instance = app_state.clients.get(client_id)
+        if instance:
+            return instance
 
         app_state.logger.error("Client %s not found", client_id)
 
@@ -202,7 +205,7 @@ class ApplicationState:
     loop: asyncio.AbstractEventLoop
     web_settings: WebOptions
     downloader_settings: DownloaderOptions
-    clients: List[Client] = []
+    clients: Dict[str, Client] = {}
     logger: logging.Logger
 
 
@@ -257,9 +260,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         while True:
             await websocket.receive_json()
     except WebSocketDisconnect:
-        instance = Client.get_instance(client_id)
-        if instance:
-            app_state.clients.remove(instance)
+        app_state.clients.pop(client_id, None)
 
         if (
             len(app_state.clients) == 0
@@ -282,6 +283,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                 await app_state.server.shutdown()
 
 
+# Deprecated
 @router.get("/api/song/url", response_model=None)
 def song_from_url(url: str) -> Song:
     """
@@ -295,6 +297,45 @@ def song_from_url(url: str) -> Song:
     """
 
     return Song.from_url(url)
+
+
+@router.get("/api/url", response_model=None)
+def songs_from_url(url: str) -> List[Song]:
+    """
+    Search for a song, playlist, artist or album on spotify using url.
+
+    ### Arguments
+    - url: The url to search.
+
+    ### Returns
+    - returns a list with Song objects to be downloaded.
+    """
+
+    if "playlist" in url:
+        playlist = Playlist.from_url(url)
+        return list(map(Song.from_url, playlist.urls))
+    if "album" in url:
+        album = Album.from_url(url)
+        return list(map(Song.from_url, album.urls))
+    if "artist" in url:
+        artist = Artist.from_url(url)
+        return list(map(Song.from_url, artist.urls))
+
+    return [Song.from_url(url)]
+
+
+@router.get("/api/version", response_model=None)
+def version() -> str:
+    """
+    Get the current version
+    This method is created to ensure backward compatibility of the web app,
+    as the web app is updated with the latest regardless of the backend version
+
+    ### Returns
+    -  returns the version of the app
+    """
+
+    return __version__
 
 
 @router.on_event("shutdown")
@@ -460,6 +501,7 @@ def update_settings(
     new_settings = DownloaderOptions(**settings_cpy)  # type: ignore
 
     # Re-initialize downloader
+    client.downloader_settings = new_settings
     client.downloader = Downloader(
         new_settings,
         loop=state.loop,
